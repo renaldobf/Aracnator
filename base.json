@@ -1,0 +1,44 @@
+{
+	"saidas":[
+		{
+			"valor":"loxosceles",
+			"entradas":[
+				{"variavel":"tamanho","valor":[6,20],"intervalo":true},
+				{"variavel":"cor","valor":["marrom","castanho-claro"]},
+				{"variavel":"olhos","valor":6},
+				{"variavel":"agressiva","valor":"não"}
+			]
+		},{
+			"valor":"latrodectus",
+			"entradas":[
+				{"variavel":"tamanho","valor":[3,13],"intervalo":true},
+				{"variavel":"cor","valor":"negra brilhante"},
+				{"variavel":"olhos","valor":8},
+				{"variavel":"agressiva","valor":"não"}
+			]
+		},{
+			"valor":"phoneutria",
+			"entradas":[
+				{"variavel":"tamanho","valor":[35,50],"intervalo":true},
+				{"variavel":"cor","valor":["cinza","marrom"]},
+				{"variavel":"olhos","valor":8},
+				{"variavel":"agressiva","valor":"sim"}
+			]
+		}
+	],
+	"perguntas":[
+		{
+			"variavel":"tamanho",
+			"pergunta":"Qual o tamanho da aranha? (milímetros)"
+		},{
+			"variavel":"cor",
+			"pergunta":"Qual a cor predominante?"
+		},{
+			"variavel":"olhos",
+			"pergunta":"Qual a quantidade de olhos?"
+		},{
+			"variavel":"agressiva",
+			"pergunta":"A aranha é agressiva?"
+		}
+	]
+}
