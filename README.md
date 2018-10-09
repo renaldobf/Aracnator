@@ -14,7 +14,7 @@ Introdução
 notificados 691.307 acidentes por animais peçonhentos, dos quais
 1.282 evoluíram para óbito. Aranhas foram responsáveis por 27.119
 dessas notificações, sendo 13 óbitos.
-Fonte: (Acidentes por Animais Peçonhentos)[http://portalarquivos.saude.gov.br/images/pdf/2016/maio/20/Informe-Epidemiol--gico-animais-pe--onhentos---.pdf]
+Fonte: [Acidentes por Animais Peçonhentos](http://portalarquivos.saude.gov.br/images/pdf/2016/maio/20/Informe-Epidemiol--gico-animais-pe--onhentos---.pdf).
 
    Foram selecionadas espécies de aranhas e pesquisados dados
 morfológicos, de hábitos e distribuição geográfica. O arquivo
