@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Aracnator</title>
+	<link rel="stylesheet" type="text/css" href="res/mini.min.css">
+	<style type="text/css">
+		html,body {
+			min-height: 100vh;
+		}
+		.center-flex {
+			display: flex;
+			flex-direction: column;
+			flex-wrap: wrap;
+			justify-content: center;
+			align-items: center;
+			height: 100%;
+			min-height: 100vh;
+		}
+		.card, .card > * {
+			background-color: #fff !important;
+		}
+		.card p {
+			padding-left: 1em;
+			padding-right: 1em;
+		}
+		.card p:first-of-type {
+			padding-top: .8em;
+		}
+		form button,
+		form input {
+			display: block;
+			width: 100%;
+			width: calc(100% - 2 * var(--universal-padding));
+			box-sizing: border-box;
+			margin: var(--universal-margin)!important;
+		}
+	</style>
+	<script type="text/javascript">
+		function uuid() {
+			return Math.floor((1 + Math.random()) * 0x10000)
+				.toString(16)
+				.substring(1);
+		}
+		function close_modal(event) {
+			let id = event.target.htmlFor;
+			let ipt = document.getElementById(id);
+			ipt.parentElement.removeChild(ipt.nextSibling);
+			ipt.parentElement.removeChild(ipt);
+		}
+		function open_modal(source) {
+			var xhr = new XMLHttpRequest();
+			xhr.overrideMimeType('text/plain');
+			xhr.onload = (e)=>{
+				show_modal(xhr.responseText);
+			};
+			xhr.open("GET", source);
+			xhr.send();
+		}
+		function show_modal(text) {
+			let id = 'modal-'+uuid();
+			let div = document.createElement('div');
+			div.innerHTML = '<div class="card" style="min-width:40em">'
+			+'<label for="'+id+'" class="modal-close" onclick="close_modal(event)"></label>'
+			+ text.replace(/<h1>/g,'<h3 class="section">')
+				.replace(/<\/h1>/g,'</h3><div class="section">')
+			+'</div>'
+			+'</div>';
+			let ipt = document.createElement('input');
+			ipt.type = 'checkbox'
+			ipt.id = id;
+			ipt.className = 'modal';
+			ipt.checked = true;
+			document.body.appendChild(ipt);
+			document.body.appendChild(div);
+		}
+
+		var splash;
+		function iniciar() {
+			if (splash) return;
+			splash = document.getElementsByTagName('div')[0];
+			document.body.removeChild(splash);
+
+			reset_state();
+			iterate();
+		}
+		function concluir() {
+			if (!splash) return;
+			remove_pergunta();
+			document.body.appendChild(splash);
+			splash = undefined;
+		}
+		/* Compatibilidade Node.js */
+		function require(source) {
+			source = source.replace(/^.\//,'');
+			var xhr = new XMLHttpRequest();
+			xhr.overrideMimeType('text/plain');
+			xhr.open("GET", source, false);
+			xhr.send();
+			return JSON.parse(xhr.response);
+		}
+	</script>
+	<script type="text/javascript" src="aracnator.js"></script>
+	<script type="text/javascript">
+		function remove_pergunta() {
+			let elem = document.getElementsByTagName('div')[0];
+			document.body.removeChild(elem);
+		}
+		/* Sobrecarga das funções Node.js */
+		finalizar = function() {
+			let div = document.body.appendChild(document.createElement('div'));
+			div.className = 'center-flex';
+
+			div = div.appendChild(document.createElement('div'));
+			div.className = 'card';
+			div.style.minWidth = '50em';
+
+			if (state.saidas.length == 0) {
+				let h = div.appendChild(document.createElement('h1'));
+				h.className = 'section';
+				h.textContent = 'Nenhuma resposta encontrada';
+
+				div.appendChild(document.createElement('p')).textContent = 
+				'Os dados informados não correspondem a nenhuma saída possível.';
+
+				div.appendChild(document.createElement('p')).textContent = 
+				'Talvez a espécie não esteja cadastrada na base de conhecimento ou alguma das características está incorreta.';
+			}
+			else if (state.saidas.length == 1) {
+				let source = 'informacoes/'+state.saidas[0].valor+'.html';
+				let xhr = new XMLHttpRequest();
+				xhr.overrideMimeType('text/plain');
+				xhr.open("GET", source, false);
+				xhr.send();
+				let text = xhr.response;
+
+				div.innerHTML = text.replace(/<h1>/g,
+					'<h1 class="section">Resposta encontrada: ');
+			}
+			else {
+				let h = div.appendChild(document.createElement('h1'));
+				h.className = 'section';
+				h.textContent = 'Nenhuma resposta encontrada';
+
+				div.appendChild(document.createElement('p')).textContent = 
+				'Os dados não foram suficientes para determinar uma espécie.';
+
+				div.appendChild(document.createElement('p')).textContent = 
+				'Dentre as presentes na base de conhecimento, as mais prováveis são:';
+
+				let p = div.appendChild(document.createElement('p'));
+
+				for (let i=0; i<state.saidas.length; i++) {
+					let button = document.createElement('button');
+					button.type = 'button';
+					button.textContent = state.saidas[i].valor;
+					button.onclick = function(opcao){
+						return function(){
+							open_modal('informacoes/'+opcao+'.html');
+						}
+					}(state.saidas[i].valor);
+					p.appendChild(button);
+				}
+			}
+
+			let p = div.appendChild(document.createElement('p'));
+			p.className = 'section';
+			let button = document.createElement('button');
+			button.type = 'button';
+			button.textContent = 'Concluir'
+			button.className = 'primary';
+			button.onclick = concluir;
+			p.appendChild(button);
+		}
+
+		faz_pergunta = function(variavel, resposta_invalida) {
+
+			let div = document.createElement('div');
+			div.className = 'center-flex';
+			document.body.appendChild(div);
+
+			let form = div.appendChild(document.createElement('form'));
+			form.onsubmit = function(event) {
+				event.preventDefault();
+				return false;
+			}
+
+			form = form.appendChild(document.createElement('fieldset'));
+
+			let pergunta = 'Informe o valor para a variável "' + variavel+'": ';
+			for (let i=0; i<base.perguntas.length; i++) {
+				if (base.perguntas[i].variavel == variavel)
+					pergunta = base.perguntas[i].pergunta;
+			}
+
+			form.appendChild(document.createElement('legend')).textContent = pergunta;
+
+			if (base.intervalos.indexOf(variavel) >= 0) {
+				form.appendChild(document.createElement('label')).textContent =
+					'Informe um valor entre '+state.valores[variavel][0]
+					+' e '+state.valores[variavel][state.valores[variavel].length-1];
+				let input = form.appendChild(document.createElement('input'));
+				input.type = 'text';
+				input.id = 'resposta';
+
+				input = form.appendChild(document.createElement('button'));
+				input.type = 'button';
+				input.className = 'primary'
+				input.textContent = 'Continuar';
+				input.onclick = function(){
+					let valor = document.getElementById('resposta').value;
+					remove_pergunta();
+					processa_entrada(valor);
+				};
+
+				input = form.appendChild(document.createElement('button'));
+				input.type = 'button';
+				input.textContent = 'Não sei';
+				input.onclick = function(){
+					remove_pergunta();
+					processa_entrada('nda');
+				};
+			}
+			else {
+				let opcoes = state.valores[variavel];
+				let input;
+
+				for (let i=0; i<opcoes.length; i++) {
+
+					input = form.appendChild(document.createElement('button'));
+					input.type = 'button';
+					input.className = 'primary'
+					input.textContent = opcoes[i];
+					input.onclick = function(opcao){
+						return function(){
+							remove_pergunta();
+							processa_entrada(opcao);
+						}
+					}(opcoes[i]);
+
+					form.appendChild(document.createElement('br'));
+
+				}
+
+				input = form.appendChild(document.createElement('button'));
+				input.type = 'button';
+				input.onclick = function(){
+					remove_pergunta();
+					processa_entrada('nda');
+				};
+				input.textContent = 'Não sei / Nenhuma das opções se aplica';	
+			}			
+
+			state.variavel = variavel;
+			state.resposta = null;
+
+			if (resposta_invalida)
+				alert('Opção inválida');
+		}
+	</script>
+</head>
+<body>
+
+<div class="center-flex">
+<figure>
+	<img src="res/aracnator.svg" alt="Aracnator">
+</figure>
+<p>
+	<button class="primary" onclick="iniciar()">Iniciar</button>
+	<button class="button" onclick="open_modal('informacoes/sobre.html')">Sobre</button>
+</p>
+</div>
+
+</body>
+</html>

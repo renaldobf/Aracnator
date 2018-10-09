@@ -1,3 +1,5 @@
+// Verifica se está executando no navegador
+var isBrowser = new Function('try{return this===window;}catch(e){return false;}');
 // Carrega a base de conhecimento
 var base = require('./base.json');
 // Estado de trabalho uma consulta
@@ -188,18 +190,25 @@ function reset_state() {
 }
 
 /*
+	Finaliza a execução da busca
+*/
+function finalizar() {
+	process.exit(0);
+}
+
+/*
 	Cria um novo nó na árvore.
 */
 function iterate() {
 	if (state.saidas.length == 0) {
 		console.log('Os dados informados não correspondem a nenhuma saída possível.');
-		process.exit(0);
+		finalizar();
 		return;
 	}
 	if (state.saidas.length == 1) {
 		console.log('Resposta encontrada:');
 		console.log(state.saidas[0].valor);
-		process.exit(0);
+		finalizar();
 		return;
 	}
 	let variavel = c45(state.saidas, state.variaveis);
@@ -207,7 +216,7 @@ function iterate() {
 		console.log('Nenhuma resposta encontrada');
 		console.log(state.saidas.length+' possíveis valores');
 		console.log(state.saidas.map((a)=>a.valor).join(', '));
-		process.exit(0);
+		finalizar();
 		return;
 	}
 	state.valores[variavel] = get_valores(state.saidas, variavel);
@@ -239,7 +248,8 @@ function faz_pergunta(variavel) {
 */
 function processa_entrada(str) {
 	if (!state.variavel) return;
-	str = str.toLowerCase();
+	if (typeof str === 'string')
+		str = str.toLowerCase();
 	if (parseInt(str) == str)
 		str = parseInt(str);
 	if (str == 'nda') {
@@ -257,7 +267,7 @@ function processa_entrada(str) {
 		base.valores[state.variavel].indexOf(str) >= 0
 	)) {
 		console.log('Opção inválida!');
-		faz_pergunta(state.variavel);
+		faz_pergunta(state.variavel, true);
 		return;
 	}
 	else {
@@ -270,10 +280,13 @@ function processa_entrada(str) {
 /*
 	Função que lê a entrada padrão
 */
+if (!isBrowser())
 process.openStdin().addListener("data", function(d) {
 	processa_entrada(d.toString().trim());
 });
 
 processar(base);
-reset_state();
-iterate();
+if (!isBrowser()) {
+	reset_state();
+	iterate();
+}

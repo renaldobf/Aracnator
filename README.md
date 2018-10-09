@@ -22,7 +22,7 @@ morfológicos, de hábitos e distribuição geográfica. O arquivo
 deste script para o funcionamento correto do sistema.
 
    A ideia original foi montada usando o Expert SINTA. O arquivo
-`aranhas.bcm` ainda pode ser visualizado na pasta. 
+`aranhas.bcm` ainda pode ser visualizado na pasta `sinta`.
 
    O SINTA ajudou a formular a ideia original, mas foi abandonado
 porque, apesar de sua interface fácil, o sistema atingiu 15 regras
@@ -55,9 +55,11 @@ Execução
 --------
 
    O arquivo está formatado para ser executado diretamente, usando
-o Node.js.
+o Node.js, ou através de um navegador com JavaScript.
 
-	node aracnator.js
+   Para usar o Node.js, execute `node aracnator.js`.
+
+   Para usar o navegador, basta abrir o arquivo `aracnator.html`.
 
 Possíveis melhorias
 -------------------
